@@ -16,4 +16,4 @@ def ejemplo_endpoint():
         return jsonify({"mensaje": f"Hola, {nombre}. Tu solicitud POST fue recibida."}), 201
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8080)
