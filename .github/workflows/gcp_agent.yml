@@ -1,0 +1,59 @@
+name: Build and Deploy 
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  REGION: ${{ secrets.REGION }}
+  APP_NAME: ${{ secrets.DEV_APP_NAME }}
+  REGISTRY_NAME: ${{ secrets.ARTIFACT_REGISTRY_NAME }}
+  SERVICE_ACCOUNT_EMAIL: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+
+jobs:
+  build-and-deploy:
+    name: Setup, Build, and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: "auth"
+        uses: google-github-actions/auth@v1.1.1
+        with:
+          credentials_json: "${{ secrets.GCP_SA_KEY }}"
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker $REGION-docker.pkg.dev
+
+      - name: Build and tag the docker image
+        run: |-
+          docker build --build-arg NODE_ENV=dev . --tag $REGION-docker.pkg.dev/$PROJECT_ID/$REGISTRY_NAME/$APP_NAME:$GITHUB_SHA
+
+      - name: Push the image to the Google Artifact Registry (GAR)
+        run: |-
+          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REGISTRY_NAME/$APP_NAME:$GITHUB_SHA
+
+      - name: Deploy
+        run: |-
+          gcloud run deploy $APP_NAME \
+          --region $REGION \
+          --image $REGION-docker.pkg.dev/$PROJECT_ID/$REGISTRY_NAME/$APP_NAME:$GITHUB_SHA \
+          --platform "managed" \
+          --service-account $SERVICE_ACCOUNT_EMAIL \
+          --port 8080 \
+          --set-env-vars PROJECT_ID=$PROJECT_ID,REGION=$REGION,APP_NAME=$APP_NAME,REGISTRY_NAME=$REGISTRY_NAME,SERVICE_ACCOUNT_EMAIL=$SERVICE_ACCOUNT_EMAIL \
+          --quiet
+
+      - name: Hacer el servicio público (Permitir invocaciones no autenticadas)
+        run: |-
+          gcloud run services add-iam-policy-binding $APP_NAME \
+          --region $REGION \
+          --member="allUsers" \
+          --role="roles/run.invoker"
