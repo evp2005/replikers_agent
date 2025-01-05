@@ -504,7 +504,7 @@ class MultiAgentLangGraphApp:
         # Si no hay llamadas a herramientas, proceder con el prompt estándar
         try:
             # Extraer el contexto de los modelos en el bucket de Google Cloud
-            pdf_context = self.analyze_all_pdfs_from_bucket(bucket_name="cv_s")
+            pdf_context = self.analyze_all_pdfs_from_bucket(bucket_name=STAGING_BUCKET)
         except Exception as e:
             pdf_context = f"Error al analizar PDFs en el bucket: {str(e)}"
 
