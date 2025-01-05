@@ -1,1 +1,10 @@
 flask==2.3.2
+langchain
+langchain_community
+langgraph
+langchain-google-vertexai
+google-cloud-storage
+PyPDF2
+gspread
+oauth2client
+google-cloud-vision

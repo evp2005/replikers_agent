@@ -1,19 +1,22 @@
 from flask import Flask, request, jsonify
+from agente import multi_agent_app
 
-app = Flask(__name__)
+app_flask = Flask(__name__)
 
-@app.route('/api/ejemplo', methods=['GET', 'POST'])
-def ejemplo_endpoint():
-    if request.method == 'GET':
-        return jsonify({"mensaje": "¡Hola, este es un ejemplo de API con Flask!"})
-    
-    if request.method == 'POST':
-        data = request.get_json()  # Leer datos en formato JSON del cuerpo de la solicitud
-        if not data or 'nombre' not in data:
-            return jsonify({"error": "El campo 'nombre' es obligatorio."}), 400
-        
-        nombre = data['nombre']
-        return jsonify({"mensaje": f"Hola, {nombre}. Tu solicitud POST fue recibida."}), 201
+@app_flask.route('/api/ask', methods=['POST'])
+def ask():
+    data = request.json
+    input_text = data.get('pregunta')
+
+    if not input_text:
+        return jsonify({'error': 'Se requiere una pregunta'}), 400
+
+    # Hacer la consulta al agente IA
+    try:
+        respuesta = multi_agent_app.query(input_text=input_text)
+        return jsonify({'respuesta': respuesta})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app_flask.run(host='0.0.0.0', port=8080, debug=True)  # Activar el modo debug
