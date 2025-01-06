@@ -1,17 +1,17 @@
 import vertexai
 import os
-from config import GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_DRIVE_CREDENTIALS, PROJECT_ID, REGION, STAGING_BUCKET
+from config import PROJECT_ID, REGION, STAGING_BUCKET, PATH_SA_AGENTE, PATH_SA_GDRIVE
 # Configura las credenciales desde el archivo JSON (opcional si ya configuraste la variable de entorno)
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS  
-os.environ["GOOGLE_DRIVE_CREDENTIALS"] = GOOGLE_DRIVE_CREDENTIALS  
-os.environ["PROJECT_ID"] = PROJECT_ID 
-os.environ["REGION"] = REGION 
-os.environ["STAGING_BUCKET"] = STAGING_BUCKET
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = PATH_SA_AGENTE 
+# os.environ["GOOGLE_DRIVE_CREDENTIALS"] = str(GOOGLE_DRIVE_CREDENTIALS)  
+# os.environ["PROJECT_ID"] = PROJECT_ID 
+# os.environ["REGION"] = REGION 
+# os.environ["STAGING_BUCKET"] = STAGING_BUCKET
 
-PROJECT_ID = PROJECT_ID # @param {type:"string"}
-REGION = REGION  # @param {type: "string"}
-STAGING_BUCKET = STAGING_BUCKET
+# PROJECT_ID = PROJECT_ID # @param {type:"string"}
+# REGION = REGION  # @param {type: "string"}
+# STAGING_BUCKET = STAGING_BUCKET
 
 # Inicializar Vertex AI
 vertexai.init(project=PROJECT_ID, location=REGION, staging_bucket=STAGING_BUCKET)
@@ -32,9 +32,9 @@ from langchain_community.document_loaders import PyPDFLoader
 import tempfile
 import os
 import io
-from vertexai.preview import reasoning_engines
-import PyPDF2
-from typing import BinaryIO
+# from vertexai.preview import reasoning_engines
+# import PyPDF2
+# from typing import BinaryIO
 
 
 from langchain.tools import tool, StructuredTool
@@ -43,7 +43,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from google.cloud import storage
 from langchain.schema import AIMessage
-from google.cloud import vision
+# from google.cloud import vision
 
 def should_continue(state: MessagesState) -> Literal["tools", END]:
     """
@@ -127,10 +127,12 @@ class MultiAgentLangGraphApp:
                 return f"Error al analizar PDFs: {str(e)}"
 
         # Configura el alcance y las credenciales
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        # scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         
-        credencials = GOOGLE_DRIVE_CREDENTIALS
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(credencials, scope)
+        # credencials = GOOGLE_DRIVE_CREDENTIALS
+        # creds = ServiceAccountCredentials.from_json_keyfile_dict(credencials, scope)
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_name(PATH_SA_GDRIVE, scope)
         client = gspread.authorize(creds)
 
         @tool

@@ -19,4 +19,4 @@ def ask():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app_flask.run(Debug=True)  # Activar el modo debug
+    app_flask.run()  # Activar el modo debug

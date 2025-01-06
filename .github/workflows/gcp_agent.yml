@@ -32,6 +32,12 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
 
+      - name: Crear llave para cuenta de servicio principal
+        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > sa-agente.json
+
+      - name: Crear llave para cuenta de servicio de Google Drive
+        run: echo "${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}" > sa-gdrive.json
+
       - name: Authorize Docker push
         run: gcloud auth configure-docker $REGION-docker.pkg.dev
 
